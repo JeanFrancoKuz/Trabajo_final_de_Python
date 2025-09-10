@@ -1,0 +1,56 @@
+[
+    {
+        "id": 1,
+        "nombre": "Camiseta",
+        "descripcion": "Camiseta de algodón",
+        "precio": 25.5,
+        "categoria": "Ropa",
+        "stock": 50,
+        "registro": "2025-09-10 00:35:25"
+    },
+    {
+        "id": 2,
+        "nombre": "Pantalon",
+        "descripcion": "Blue jean clasico",
+        "precio": 40.5,
+        "categoria": "Ropa",
+        "stock": 30,
+        "registro": "2025-09-10 00:37:41"
+    },
+    {
+        "id": 3,
+        "nombre": "Pantalon",
+        "descripcion": "Blue jean baggy",
+        "precio": 50.5,
+        "categoria": "Ropa",
+        "stock": 20,
+        "registro": "2025-09-10 00:37:43"
+    },
+    {
+        "id": 4,
+        "nombre": "Gorra",
+        "descripcion": "Gorra plana",
+        "precio": 8.5,
+        "categoria": "Ropa",
+        "stock": 60,
+        "registro": "2025-09-10 00:37:44"
+    },
+    {
+        "id": 5,
+        "nombre": "Cuchara prada",
+        "descripcion": "Cuchara prada y ya pue",
+        "precio": 9999.0,
+        "categoria": "Artilugio",
+        "stock": 1,
+        "registro": "2025-09-10 00:37:45"
+    },
+    {
+        "id": 6,
+        "nombre": "tenedor prada",
+        "descripcion": "Tenedor prada y ya pue",
+        "precio": 9999.0,
+        "categoria": "Artilugio",
+        "stock": 1,
+        "registro": "2025-09-10 00:37:46"
+    }
+]

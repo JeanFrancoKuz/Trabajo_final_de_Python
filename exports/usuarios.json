@@ -1,0 +1,68 @@
+[
+    {
+        "id": 1,
+        "nombres": "Juan",
+        "apellidos": "Pérez",
+        "edad": 25,
+        "telefono": "123456789",
+        "correo": "juan@example.com",
+        "ciudad": "Caracas",
+        "pais": "Venezuela",
+        "registro": "2025-08-24 01:36:25"
+    },
+    {
+        "id": 2,
+        "nombres": "Fabiola",
+        "apellidos": "Conde",
+        "edad": 21,
+        "telefono": "04242653244",
+        "correo": "Fabioladelarosa@gmail.com",
+        "ciudad": "Caracas",
+        "pais": "Venezuela",
+        "registro": "2025-08-24 01:38:36"
+    },
+    {
+        "id": 3,
+        "nombres": "Sussan",
+        "apellidos": "Kuzniar",
+        "edad": 42,
+        "telefono": "04126307564",
+        "correo": "kuzniarsussan@gmail.com",
+        "ciudad": "Caracas",
+        "pais": "Venezuela",
+        "registro": "2025-09-02 22:15:44"
+    },
+    {
+        "id": 4,
+        "nombres": "Jean Franco",
+        "apellidos": "Kuzniar",
+        "edad": 23,
+        "telefono": "04123971034",
+        "correo": "kuzniarfranco@gmail.com",
+        "ciudad": "Caracas",
+        "pais": "Venezuela",
+        "registro": "2025-09-02 22:39:22"
+    },
+    {
+        "id": 5,
+        "nombres": "Juan",
+        "apellidos": "Pérez",
+        "edad": 28,
+        "telefono": "555123456",
+        "correo": "juan.perez@example.com",
+        "ciudad": "Madrid",
+        "pais": "España",
+        "registro": "2025-09-02 23:09:06"
+    },
+    {
+        "id": 7,
+        "nombres": "Darwin",
+        "apellidos": "Castillo",
+        "edad": 40,
+        "telefono": "04120000000",
+        "correo": "Darwin@gmail.com",
+        "ciudad": "Los Teques",
+        "pais": "Venezuela",
+        "registro": "2025-09-03 22:15:56"
+    }
+]
