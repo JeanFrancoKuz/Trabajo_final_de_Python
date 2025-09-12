@@ -2,13 +2,13 @@ from flask import Blueprint, request, jsonify, Response
 from service.product_service import create_product, get_products, get_product_by_id, update_product, delete_product
 from exports.export_products import export_products
 from bs4 import BeautifulSoup
+from flask_jwt_extended import jwt_required
 import requests
 import json
 from collections import OrderedDict
 
 productos_bp = Blueprint("productos_bp", __name__)
 
-# Formatear producto para salida JSON (orden específico)
 def formatear_producto(producto):
     return OrderedDict([
         ("id", producto.get("id")),
@@ -22,12 +22,13 @@ def formatear_producto(producto):
 
 # Crear producto
 @productos_bp.route("/productos", methods=["POST"])
+@jwt_required()
 def crear_producto():
     try:
         data = request.json
         required_fields = ["nombre", "precio", "categoria", "stock"]
         for field in required_fields:
-            if field not in data:
+            if field not in data or data[field] is None:
                 return jsonify({"success": False, "message": f"Falta el campo {field}"}), 400
 
         resultado = create_product(
@@ -37,15 +38,18 @@ def crear_producto():
             categoria=data["categoria"],
             stock=data["stock"]
         )
-        if resultado:
+
+        if resultado["success"]:
             return jsonify({"success": True, "message": "Producto creado correctamente."}), 201
         else:
-            return jsonify({"success": False, "message": "Error al crear producto."}), 400
+            # Duplicidad
+            return jsonify({"success": False, "message": resultado.get("message", "Producto duplicado")}), 409
     except Exception as e:
-        return jsonify({"success": False, "message": f"Error inesperado: {e}"}), 500
+        return jsonify({"success": False, "message": f"Error inesperado al crear producto: {e}"}), 500
 
-# Listar productos con filtros opcionales (nombre, categoria)
+# Listar productos
 @productos_bp.route("/productos", methods=["GET"])
+@jwt_required()
 def listar_productos():
     try:
         nombre = request.args.get("nombre")
@@ -53,32 +57,26 @@ def listar_productos():
         resultado = get_products(nombre, categoria)
         if resultado["success"]:
             productos_formateados = [formatear_producto(p) for p in resultado["data"]]
-            return Response(
-                json.dumps({"success": True, "data": productos_formateados}, indent=2),
-                mimetype="application/json"
-            )
-        else:
-            return jsonify(resultado), 400
+            return Response(json.dumps({"success": True, "data": productos_formateados}, indent=2), mimetype="application/json")
+        return jsonify({"success": False, "message": "Error al listar productos"}), 400
     except Exception as e:
         return jsonify({"success": False, "message": f"Error inesperado al listar productos: {e}"}), 500
 
 # Obtener producto por ID
 @productos_bp.route("/productos/<int:product_id>", methods=["GET"])
+@jwt_required()
 def producto_por_id(product_id):
     try:
         resultado = get_product_by_id(product_id)
         if resultado["success"]:
-            return Response(
-                json.dumps({"success": True, "data": formatear_producto(resultado["data"])}, indent=2),
-                mimetype="application/json"
-            )
-        else:
-            return jsonify(resultado), 404
+            return Response(json.dumps({"success": True, "data": formatear_producto(resultado["data"])}, indent=2), mimetype="application/json")
+        return jsonify({"success": False, "message": "Producto no encontrado"}), 404
     except Exception as e:
         return jsonify({"success": False, "message": f"Error inesperado al obtener producto: {e}"}), 500
 
 # Actualizar producto
 @productos_bp.route("/productos/<int:product_id>", methods=["PUT"])
+@jwt_required()
 def actualizar_producto(product_id):
     try:
         data = request.json
@@ -90,23 +88,30 @@ def actualizar_producto(product_id):
             categoria=data.get("categoria"),
             stock=data.get("stock")
         )
-        status = 200 if resultado["success"] else 400
-        return jsonify(resultado), status
+        if resultado["success"]:
+            return jsonify({"success": True, "message": "Producto actualizado correctamente"}), 200
+        else:
+            if "duplicado" in resultado.get("message", "").lower():
+                return jsonify({"success": False, "message": resultado.get("message")}), 409
+            return jsonify({"success": False, "message": resultado.get("message")}), 400
     except Exception as e:
         return jsonify({"success": False, "message": f"Error inesperado al actualizar producto: {e}"}), 500
 
 # Eliminar producto
 @productos_bp.route("/productos/<int:product_id>", methods=["DELETE"])
+@jwt_required()
 def eliminar_producto(product_id):
     try:
         resultado = delete_product(product_id)
-        status = 200 if resultado["success"] else 404
-        return jsonify(resultado), status
+        if resultado["success"]:
+            return jsonify({"success": True, "message": "Producto eliminado correctamente"}), 200
+        return jsonify({"success": False, "message": "Producto no encontrado"}), 404
     except Exception as e:
         return jsonify({"success": False, "message": f"Error inesperado al eliminar producto: {e}"}), 500
 
 # Exportar productos
 @productos_bp.route("/productos/exportar", methods=["GET"])
+@jwt_required()
 def exportar_productos():
     try:
         formato = request.args.get("formato", "json").lower()
@@ -117,25 +122,34 @@ def exportar_productos():
     except Exception as e:
         return jsonify({"success": False, "message": f"Error inesperado al exportar productos: {e}"}), 500
 
-# Importar productos vía web scraping (ejemplo simple)
-@productos_bp.route("/productos/importar", methods=["POST"])
-def importar_productos():
+# Buscar productos por nombre
+@productos_bp.route("/productos/nombre/<string:nombre>", methods=["GET"])
+@jwt_required()
+def productos_por_nombre(nombre):
     try:
-        url = request.json.get("url")
-        if not url:
-            return jsonify({"success": False, "message": "Falta el campo 'url'"}), 400
-
-        response = requests.get(url)
-        soup = BeautifulSoup(response.text, "html.parser")
-        # Aquí deberías definir la lógica de scraping específica
-        # Ejemplo: extraer nombres y precios de algún selector
-        productos_scrapeados = [
-            {"nombre": "Producto Demo", "precio": 100, "categoria": "Demo", "stock": 10, "descripcion": "Demo"}
-        ]
-        # Guardar en DB
-        for p in productos_scrapeados:
-            create_product(p["nombre"], p["descripcion"], p["precio"], p["categoria"], p["stock"])
-
-        return jsonify({"success": True, "message": "Productos importados correctamente."}), 201
+        resultado = get_products(nombre=nombre)
+        if resultado["success"]:
+            if not resultado["data"]:
+                return jsonify({"success": True, "message": "No se encontraron productos con ese nombre", "data": []}), 200
+            productos_formateados = [formatear_producto(p) for p in resultado["data"]]
+            return jsonify({"success": True, "data": productos_formateados}), 200
+        return jsonify({"success": False, "message": "Error al buscar productos por nombre"}), 400
     except Exception as e:
-        return jsonify({"success": False, "message": f"Error inesperado al importar productos: {e}"}), 500
+        return jsonify({"success": False, "message": f"Error al buscar productos por nombre: {e}"}), 500
+
+# Buscar productos por categoría
+@productos_bp.route("/productos/categoria/<string:categoria>", methods=["GET"])
+@jwt_required()
+def productos_por_categoria(categoria):
+    try:
+        resultado = get_products(categoria=categoria)
+        if resultado["success"]:
+            if not resultado["data"]:
+                return jsonify({"success": True, "message": "No se encontraron productos en esta categoría", "data": []}), 200
+            productos_formateados = [formatear_producto(p) for p in resultado["data"]]
+            return jsonify({"success": True, "data": productos_formateados}), 200
+        return jsonify({"success": False, "message": "Error al buscar productos por categoría"}), 400
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error al buscar productos por categoría: {e}"}), 500
+
+

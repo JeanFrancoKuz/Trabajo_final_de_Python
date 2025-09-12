@@ -1,7 +1,7 @@
-# service/auth_services.py
+# auth_services.py
 from flask_jwt_extended import decode_token
 
-BLACKLIST = set()
+BLACKLIST = set()  # <-- define aquí
 
 def logout(token):
     try:

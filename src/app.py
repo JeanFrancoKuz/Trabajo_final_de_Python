@@ -7,6 +7,7 @@ from service.auth_services import BLACKLIST
 
 from database import init_db
 
+
 # Crear la app de Flask
 app = Flask(__name__)
 
