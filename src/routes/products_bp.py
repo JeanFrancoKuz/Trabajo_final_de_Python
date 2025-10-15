@@ -20,7 +20,6 @@ def formatear_producto(producto):
         ("registro", producto.get("registro"))
     ])
 
-# Crear producto
 @productos_bp.route("/productos", methods=["POST"])
 @jwt_required()
 def crear_producto():
@@ -42,12 +41,11 @@ def crear_producto():
         if resultado["success"]:
             return jsonify({"success": True, "message": "Producto creado correctamente."}), 201
         else:
-            # Duplicidad
             return jsonify({"success": False, "message": resultado.get("message", "Producto duplicado")}), 409
     except Exception as e:
         return jsonify({"success": False, "message": f"Error inesperado al crear producto: {e}"}), 500
 
-# Listar productos
+
 @productos_bp.route("/productos", methods=["GET"])
 @jwt_required()
 def listar_productos():
@@ -62,7 +60,7 @@ def listar_productos():
     except Exception as e:
         return jsonify({"success": False, "message": f"Error inesperado al listar productos: {e}"}), 500
 
-# Obtener producto por ID
+
 @productos_bp.route("/productos/<int:product_id>", methods=["GET"])
 @jwt_required()
 def producto_por_id(product_id):
@@ -74,7 +72,7 @@ def producto_por_id(product_id):
     except Exception as e:
         return jsonify({"success": False, "message": f"Error inesperado al obtener producto: {e}"}), 500
 
-# Actualizar producto
+
 @productos_bp.route("/productos/<int:product_id>", methods=["PUT"])
 @jwt_required()
 def actualizar_producto(product_id):
@@ -97,7 +95,7 @@ def actualizar_producto(product_id):
     except Exception as e:
         return jsonify({"success": False, "message": f"Error inesperado al actualizar producto: {e}"}), 500
 
-# Eliminar producto
+
 @productos_bp.route("/productos/<int:product_id>", methods=["DELETE"])
 @jwt_required()
 def eliminar_producto(product_id):
@@ -109,7 +107,7 @@ def eliminar_producto(product_id):
     except Exception as e:
         return jsonify({"success": False, "message": f"Error inesperado al eliminar producto: {e}"}), 500
 
-# Exportar productos
+
 @productos_bp.route("/productos/exportar", methods=["GET"])
 @jwt_required()
 def exportar_productos():
@@ -122,7 +120,7 @@ def exportar_productos():
     except Exception as e:
         return jsonify({"success": False, "message": f"Error inesperado al exportar productos: {e}"}), 500
 
-# Buscar productos por nombre
+
 @productos_bp.route("/productos/nombre/<string:nombre>", methods=["GET"])
 @jwt_required()
 def productos_por_nombre(nombre):
@@ -137,7 +135,6 @@ def productos_por_nombre(nombre):
     except Exception as e:
         return jsonify({"success": False, "message": f"Error al buscar productos por nombre: {e}"}), 500
 
-# Buscar productos por categoría
 @productos_bp.route("/productos/categoria/<string:categoria>", methods=["GET"])
 @jwt_required()
 def productos_por_categoria(categoria):
@@ -153,3 +150,48 @@ def productos_por_categoria(categoria):
         return jsonify({"success": False, "message": f"Error al buscar productos por categoría: {e}"}), 500
 
 
+# WEB SCRAPING (Importar productos desde web)
+@productos_bp.route("/productos/importar", methods=["POST"])
+@jwt_required()
+def importar_productos():
+    """
+    Extrae productos desde una web pública de prueba (sin autenticación)
+    y los inserta en la base de datos.
+    """
+    try:
+        url = "https://webscraper.io/test-sites/e-commerce/static/computers/laptops"
+        page = requests.get(url, timeout=10)
+        soup = BeautifulSoup(page.text, "html.parser")
+
+        productos_extraidos = []
+        items = soup.select(".thumbnail")
+
+        for item in items:
+            nombre = item.select_one(".title").get_text(strip=True)
+            descripcion = item.select_one(".description").get_text(strip=True)
+            precio = float(item.select_one(".price").get_text(strip=True).replace("$", ""))
+            categoria = "Laptops"
+            stock = 10  # valor por defecto
+
+            resultado = create_product(
+                nombre=nombre,
+                descripcion=descripcion,
+                precio=precio,
+                categoria=categoria,
+                stock=stock
+            )
+
+            if resultado["success"]:
+                productos_extraidos.append(nombre)
+
+        if not productos_extraidos:
+            return jsonify({"success": False, "message": "No se importaron nuevos productos (posiblemente duplicados)."}), 200
+
+        return jsonify({
+            "success": True,
+            "message": f"{len(productos_extraidos)} productos importados exitosamente.",
+            "productos": productos_extraidos
+        }), 201
+
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error en web scraping: {e}"}), 500

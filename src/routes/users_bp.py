@@ -85,8 +85,9 @@ def listar_usuarios():
         ciudad = request.args.get("ciudad")
         edad_min = request.args.get("edad_min", type=int)
         edad_max = request.args.get("edad_max", type=int)
+        correo = request.args.get("correo")
 
-        resultado = get_users(pais, ciudad, edad_min, edad_max)
+        resultado = get_users(pais, ciudad, edad_min, edad_max, correo)
         if resultado["success"]:
             usuarios_formateados = [formatear_usuario(u) for u in resultado["data"]]
             return jsonify({"success": True, "data": usuarios_formateados}), 200

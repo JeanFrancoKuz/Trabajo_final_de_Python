@@ -4,7 +4,7 @@ from routes.products_bp import productos_bp
 from routes.sales_bp import sales_bp 
 from flask_jwt_extended import JWTManager
 from service.auth_services import BLACKLIST
-
+from datetime import timedelta
 from database import init_db
 
 
@@ -15,8 +15,11 @@ app = Flask(__name__)
 init_db()
 
 # Configuración JWT
-app.config["JWT_SECRET_KEY"] = "TU_CLAVE_SECRETA_AQUI"  # Mejor poner en .env
+app.config["JWT_SECRET_KEY"] = "TU_CLAVE_SECRETA_AQUI"
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=30) #Para pruebas
 jwt = JWTManager(app)
+app.config['DEBUG'] = True
+
 
 app.config["JWT_BLACKLIST_ENABLED"] = True
 
@@ -28,7 +31,6 @@ def check_if_token_revoked(jwt_header, jwt_payload):
 app.register_blueprint(usuarios_bp, url_prefix="/api")
 app.register_blueprint(productos_bp, url_prefix="/api")
 app.register_blueprint(sales_bp, url_prefix="/api")
-
 
 # Ruta principal de prueba
 @app.route("/")

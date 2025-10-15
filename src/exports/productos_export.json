@@ -14,7 +14,7 @@
         "descripcion": "Blue jean clasico",
         "precio": 40.5,
         "categoria": "Ropa",
-        "stock": 30,
+        "stock": 27,
         "registro": "2025-09-10 00:37:41"
     },
     {
@@ -45,12 +45,12 @@
         "registro": "2025-09-10 00:37:45"
     },
     {
-        "id": 6,
-        "nombre": "tenedor prada",
-        "descripcion": "Tenedor prada y ya pue",
-        "precio": 9999.0,
-        "categoria": "Artilugio",
-        "stock": 1,
-        "registro": "2025-09-10 00:37:46"
+        "id": 8,
+        "nombre": "Vestido prueba",
+        "descripcion": "Prueba de un vestido",
+        "precio": 35.0,
+        "categoria": "Ropa",
+        "stock": 12,
+        "registro": "2025-09-25 00:12:08"
     }
 ]

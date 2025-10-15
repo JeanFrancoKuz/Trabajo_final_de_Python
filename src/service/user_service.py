@@ -35,7 +35,7 @@ def verify_user(correo, password):
         conn.close()
 
 # Obtener todos los usuarios con filtros opcionales
-def get_users(pais=None, ciudad=None, edad_min=None, edad_max=None):
+def get_users(pais=None, ciudad=None, edad_min=None, edad_max=None, correo=None):
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -49,6 +49,8 @@ def get_users(pais=None, ciudad=None, edad_min=None, edad_max=None):
             query += " AND edad>=?"; params.append(edad_min)
         if edad_max is not None:
             query += " AND edad<=?"; params.append(edad_max)
+        if correo is not None:
+            query += " AND correo=?"; params.append(correo)
         cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
         users = [dict(row) for row in rows]
